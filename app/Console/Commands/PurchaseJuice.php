@@ -3,8 +3,9 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use \Cache;
+use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
+use Exception;
 
 class PurchaseJuice extends Command
 {
@@ -20,7 +21,7 @@ class PurchaseJuice extends Command
      *
      * @var string
      */
-    protected $description = 'お題';
+    protected $description = 'ジュースを購入する';
 
     /**
      * Create a new command instance.
@@ -40,11 +41,23 @@ class PurchaseJuice extends Command
     public function handle()
     {
         $juice = $this->argument('juice');
+        $amount = Cache::get('amount');
         $juices = Cache::get('juices');
 
-        if (Cache::get('amount') < $juices['コーラ']['price']) {
-            exit;
+        if (!$juices) {
+            throw new Exception('not exists juices');
         }
+
+        // 金額が足りていない場合は何もせず終了
+        if (!$amount && $amount < $juices[$juice]['price']) {
+            throw new Exception('not exists juices');
+        }
+
+        // 数量を1減らして釣り銭を計算する
+        $juices[$juice]['quantity'] = $juices[$juice]['quantity'] - 1;
+        $expiresAt = Carbon::now()->addMinutes(10);
+        Cache::put('juices', $juices, $expiresAt);
+        Cache::put('amount', $amount - $juices[$juice]['price'], $expiresAt);
 
         // おつりを出力
         echo Cache::get('amount');

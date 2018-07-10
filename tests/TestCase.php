@@ -4,11 +4,18 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Artisan;
-use \Cache;
+use Illuminate\Support\Facades\Cache;
 
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
+
+    protected function init()
+    {
+        $this->resetMoney();
+        $this->setJuice();
+    }
+
     protected function setJuice()
     {
         Artisan::call('issue:set');
@@ -35,8 +42,8 @@ abstract class TestCase extends BaseTestCase
 
     protected function canPurchase()
     {
-        Artisan::call('issue:cunPurchase');
-        return Artisan::output();
+        Artisan::call('issue:canPurchase');
+        return (boolean)Artisan::output();
     }
 
     protected function getAmount()

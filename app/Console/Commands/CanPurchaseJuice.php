@@ -3,8 +3,9 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 
-class CanPurchaceJuice extends Command
+class CanPurchaseJuice extends Command
 {
     /**
      * The name and signature of the console command.
@@ -37,6 +38,7 @@ class CanPurchaceJuice extends Command
      */
     public function handle()
     {
-        //
+        $this->info(120 <= Cache::get('amount') && Cache::get('juices')['コーラ']['quantity'] > 0);
+        echo '[[[[[[' . Cache::get('juices')['コーラ']['quantity'] . ']]]]]]]]]]';
     }
 }

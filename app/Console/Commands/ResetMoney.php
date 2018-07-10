@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use \Cache;
+use Illuminate\Support\Facades\Cache;
 
 class ResetMoney extends Command
 {
@@ -19,7 +19,7 @@ class ResetMoney extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = '投入金額をリセットする';
 
     /**
      * Create a new command instance.
@@ -38,7 +38,7 @@ class ResetMoney extends Command
      */
     public function handle()
     {
+        $this->info(Cache::get('amount'));
         Cache::forget('amount');
-        echo '投入金額をリセットしました。' . PHP_EOL;
     }
 }

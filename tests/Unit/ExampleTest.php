@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use Tests\TestCase;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 
 class ExampleTest extends TestCase
 {
@@ -12,6 +13,8 @@ class ExampleTest extends TestCase
      */
     public function testPutMoneyCanPurchase()
     {
+        $this->init();
+
         $this->putMoney(10);
         $this->assertEquals(10, $this->getAmount());
         $this->putMoney(50);
@@ -29,12 +32,14 @@ class ExampleTest extends TestCase
      */
     public function testPutCanNotPurchase()
     {
+        $this->init();
+
         $this->putMoney(1);
-        $this->assertEquals(1, Artisan::output());
+        $this->assertEquals(1, (int)Artisan::output());
         $this->putMoney(5000);
-        $this->assertEquals(5000, Artisan::output());
+        $this->assertEquals(5000, (int)Artisan::output());
         $this->putMoney(10000);
-        $this->assertEquals(10000, Artisan::output());
+        $this->assertEquals(10000, (int)Artisan::output());
     }
 
     /**
@@ -42,6 +47,8 @@ class ExampleTest extends TestCase
      */
     public function testGetAmount()
     {
+        $this->init();
+
         $this->putMoney(10);
         $this->putMoney(100);
         $this->assertEquals(110, $this->getAmount());
@@ -52,10 +59,12 @@ class ExampleTest extends TestCase
      */
     public function testRefund()
     {
+        $this->init();
+
         $this->putMoney(10);
         $this->putMoney(100);
         $this->resetMoney();
-        $this->assertEquals(110, Artisan::output());
+        $this->assertEquals(110, (int)Artisan::output());
     }
 
     /**
@@ -63,7 +72,7 @@ class ExampleTest extends TestCase
      */
     public function testManageJuice()
     {
-        $this->setJuice();
+        $this->init();
 
         $juices = [
             'コーラ' => [
@@ -72,8 +81,8 @@ class ExampleTest extends TestCase
             ]
         ];
 
-        $this->assertEquals($this->getJuices()['price'], $juices['コーラ']['price']);
-        $this->assertEquals($this->getJuices()['quantity'], $juices['コーラ']['quantity']);
+        $this->assertEquals($this->getJuices()['コーラ']['price'], $juices['コーラ']['price']);
+        $this->assertEquals($this->getJuices()['コーラ']['quantity'], $juices['コーラ']['quantity']);
     }
 
     /**
@@ -81,11 +90,12 @@ class ExampleTest extends TestCase
      */
     public function testCanPurchaseOK()
     {
-        $this->setJuice();
+        $this->init();
+
         $this->putMoney(100);
         $this->putMoney(10);
         $this->putMoney(10);
-        $this->assertEquals('ok', $this->canPurchase());
+        $this->assertEquals(true, $this->canPurchase());
     }
 
     /**
@@ -93,9 +103,10 @@ class ExampleTest extends TestCase
      */
     public function testCanPurchaseNG()
     {
-        $this->setJuice();
+        $this->init();
+
         $this->putMoney(100);
-        $this->assertEquals('ng', $this->canPurchase());
+        $this->assertEquals(false, $this->canPurchase());
     }
 
     /**
@@ -103,7 +114,8 @@ class ExampleTest extends TestCase
      */
     public function testPurchaseLackOfMoney()
     {
-        $this->setJuice();
+        $this->init();
+
         $quantity = Cache::get('juices')['コーラ']['quantity'];
         $this->putMoney(100);
         $this->purchaseJuice('コーラ');
@@ -115,7 +127,8 @@ class ExampleTest extends TestCase
      */
     public function testPurchaseCompleteHasChange()
     {
-        $this->setJuice();
+        $this->init();
+
         $quantity = $this->getJuices()['コーラ']['quantity'];
         $this->putMoney(100);
         $this->putMoney(10);
@@ -123,7 +136,7 @@ class ExampleTest extends TestCase
         $this->putMoney(10);
         $this->purchaseJuice('コーラ');
         $this->assertEquals($quantity - 1, $this->getJuices()['コーラ']['quantity']);
-        $this->assertEquals(10, Artisan::output());
+        $this->assertEquals(10, (int)Artisan::output());
     }
 
     /**
@@ -131,13 +144,14 @@ class ExampleTest extends TestCase
      */
     public function testPurchaseCompleteHasNotChange()
     {
-        $this->setJuice();
+        $this->init();
+
         $quantity = $this->getJuices()['コーラ']['quantity'];
         $this->putMoney(100);
         $this->putMoney(10);
         $this->putMoney(10);
         $this->purchaseJuice('コーラ');
         $this->assertEquals($quantity - 1, $this->getJuices()['コーラ']['quantity']);
-        $this->assertEquals(0, Artisan::output());
+        $this->assertEquals(0, (int)Artisan::output());
     }
 }

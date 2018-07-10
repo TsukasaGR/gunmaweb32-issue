@@ -3,8 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use \Cache;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class PutMoney extends Command
 {
@@ -39,7 +38,21 @@ class PutMoney extends Command
      */
     public function handle()
     {
+        if ($this->validation()) {
+            $money = $this->argument('money');
+            Cache::increment('amount', $money);
+        }
+    }
+
+    private function validation()
+    {
+        $invalidMoney = [1, 5000, 10000];
         $money = $this->argument('money');
-        Cache::increment('amount', $money);
+        if (in_array($money, $invalidMoney)) {
+            $this->info($money);
+            return false;
+        }
+
+        return true;
     }
 }
